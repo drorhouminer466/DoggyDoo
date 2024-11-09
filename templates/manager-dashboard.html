@@ -1,0 +1,365 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stations</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+    <style>
+        .Stations-table {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60%;
+            overflow-x: auto;
+            position: absolute;
+            top: 18%;
+            border-radius: 15px;
+        }
+
+        .Stations-table table {
+            border-collapse: collapse;
+            border-radius: 15px 15px 0 0;
+            background: whitesmoke;
+            width: 100%;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .Stations-table th, .employee-table td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        .Stations-table th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            color: black;
+        }
+
+        .kpi-box {
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 35%;
+            width: 90%;
+            left: 5%;
+            right: 5%;
+        }
+
+        .chart-container, .employee-chart-container {
+            width: 45%;
+            background: white;
+            border-radius: 10px;
+            height: 250px; /* Set consistent height for the charts */
+            display: flex;
+            align-items: center; /* Center the canvas vertically */
+            justify-content: center; /* Center the canvas horizontally */
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .chart2-wrapper {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 67%;
+            height: 100px;
+            width: 90%;
+            left: 5%;
+            right: 5%;
+        }
+
+        .avg-chart, .type-chart {
+            width: 45%;
+            background: white;
+            border-radius: 10px;
+            height: 250px; /* Set consistent height for the charts */
+            display: flex;
+            align-items: center; /* Center the canvas vertically */
+            justify-content: center; /* Center the canvas horizontally */
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+          .nav-button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+             <button id="logout" type="button" style="position: absolute; right: 0px;height:100% ">
+                <img src="{% static 'logout.png' %}" style="width: 47px;">
+            </button>
+            <button id="data" type="button" style="position: absolute; right: 70px;height:100%;background: #FFAE42 ; ">
+                <img src="{% static 'data.png' %}" style="width: 47px;">
+            </button>
+         <button id="employees" type="button" style="position: absolute; right: 140px;height:100% ">
+                <img src="{% static 'employees.png' %}" style="width: 47px;">
+            </button>
+            <button id="stations" type="button" style="position: absolute; right: 210px;height:100%;">
+                <img src="{% static 'stations.png' %}" style="width: 47px;">
+            </button>
+            <button id="alerts" type="button" style="position: absolute; right: 280px;height:100% ">
+                <img src="{% static 'alert.png' %}" style="width: 47px;">
+            </button>
+
+        </div>
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">סקירה</div>
+        </div>
+        <div class="Stations-table" id="Stations-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="kpi-box">מס' עמדות ריקות:<br>{{ empty_stations_count }}</th>
+                        <th></th>
+                        <th class="kpi-box">סך הכל דיווחים פתוחים:<br>{{ open_report_query }}</th>
+                         <th></th>
+                        <th class="kpi-box">זמן ממוצע לטיפול בדיווח בימים:<br>{{ avg_days }} ימים</th>
+                         <th></th>
+                        <th class="kpi-box">דיווחים שנפתחו בשבוע האחרון:<br>{{ open_report_past_week }}</th>
+                         <th></th>
+                        <th class="kpi-box">דיווחים סגורים שנפתחו בשבוע האחרון:<br>{{ closed_report_open_past_week }}</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="chart-wrapper">
+            <div class="chart-container">
+                <canvas id="reportChart"></canvas>
+            </div>
+
+            <div class="employee-chart-container">
+                <canvas id="employeeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart2-wrapper">
+            <div class="avg-chart">
+                <canvas id="avgtime"></canvas>
+            </div>
+
+            <div class="type-chart">
+                <canvas id="reportTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var ctx = document.getElementById('reportChart').getContext('2d');
+            var reportChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for station in reports_per_station %}"{{ station.address }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    datasets: [{
+                        label: 'כמות דיווחים לכל עמדה',
+                        data: [{% for station in reports_per_station %}{{ station.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                        backgroundColor: '#CBC3E3', // Solid blue background
+                        borderColor: '#CBC3E3',     // Solid blue border
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'x', // Keep x-axis as the horizontal axis
+                    scales: {
+                        x: {
+                            reverse: false, // Reverse the x-axis order
+                            grid: {
+                                display: false // Optional: Hide x-axis grid lines
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            position: 'left', // Position y-axis on the right
+                            ticks: {
+                                stepSize: 1 // Set step size for y-axis ticks
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            right: 20 // Add padding on the right for better visibility
+                        }
+                    },
+                    plugins: {
+                        rtl: true, // Right-to-left text direction
+                    }
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var ctx = document.getElementById('employeeChart').getContext('2d');
+            var reportChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for employee in count_reports_per_employee %}"{{ employee.first_name }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    datasets: [{
+                        label: 'כמות טיפולים לפי עובד',
+                        data: [{% for employee in count_reports_per_employee %}{{ employee.count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                        backgroundColor: '#CBC3E3',
+                        borderColor: '#CBC3E3',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'x', // Keep x-axis as the horizontal axis
+                    scales: {
+                        x: {
+                            reverse: false, // Reverse the x-axis order
+                            grid: {
+                                display: false // Optional: Hide x-axis grid lines
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            position: 'left', // Position y-axis on the right
+                            ticks: {
+                                stepSize: 1 // Set step size for y-axis ticks
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            right: 20 // Add padding on the right for better visibility
+                        }
+                    },
+                    plugins: {
+                        rtl: true, // Right-to-left text direction
+                    }
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var ctx = document.getElementById('avgtime').getContext('2d');
+            var reportChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [{% for station in avg_time_to_open %}{% if station.avgTimeDiffDays is not None %}"{{ station.address }}"{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}],
+                    datasets: [{
+                        label: 'זמן ממוצע להתרוקנות עמדה בימים',
+                        data: [{% for station in avg_time_to_open %}{% if station.avgTimeDiffDays is not None %}{{ station.avgTimeDiffDays }}{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}],
+                        backgroundColor: '#CBC3E3',
+                        borderColor: '#CBC3E3',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'x', // Keep x-axis as the horizontal axis
+                    scales: {
+                        x: {
+                            reverse: false, // Reverse the x-axis order
+                            grid: {
+                                display: false // Optional: Hide x-axis grid lines
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            position: 'left', // Position y-axis on the right
+                            ticks: {
+                                stepSize: 1 // Set step size for y-axis ticks
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            right: 20 // Add padding on the right for better visibility
+                        }
+                    },
+                    plugins: {
+                        rtl: true, // Right-to-left text direction
+                    }
+                }
+            });
+        });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById('reportTypeChart').getContext('2d');
+        var reportTypeChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['דיווחים על עמדות ריקות', 'דיווחים על אזורים מלוכלכים'],
+                datasets: [{
+                    label: 'Report Types',
+                    data: [{{ bag_count }}, {{ area_count }}],
+                    backgroundColor: ['#CBC3E3', '#FFB6C1'],
+                    borderColor: ['#CBC3E3', '#FFB6C1'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        anchor: 'center',
+                        align: 'center',
+                        formatter: function(value, context) {
+                            return value; // Display the value on the chart
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    });
+
+      var employeesBtn = document.getElementById("employees");
+      var stationsBtn = document.getElementById("stations");
+      var alertsBtn = document.getElementById("alerts");
+      var logoutBth=document.getElementById("logout");
+      employeesBtn.onclick = function() {
+                window.location.href = "/employees";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+      stationsBtn.onclick = function() {
+                window.location.href = "/stations";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+      alertsBtn.onclick = function() {
+                window.location.href = "/managerAlert";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+            logoutBth.onclick = function() {
+                window.location.href = "/";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+
+    </script>
+</body>
+</html>

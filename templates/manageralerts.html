@@ -1,0 +1,365 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stations</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        .Stations-table, .potential-table {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            overflow-x: auto;
+            border-radius: 15px;
+            max-height: 25%;
+            overflow-y: auto;
+        }
+
+        .Stations-table {
+            position: absolute;
+            top: 19%;
+        }
+
+        .potential-table {
+            position: absolute;
+            top: 60%;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: skyblue;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        td {
+            color: #2D2826;
+        }
+
+        .top-bar, .titles, .container, .title-app, .title-page {
+            /* Your existing styles */
+        }
+
+        .radius-form {
+            margin: 10px;
+            text-align: center;
+            position: absolute;
+            top: 82%;
+            width: 70%;
+            alignment: center;
+            align-items: center;
+        }
+
+        .select-wrapper {
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #3D5872;
+            width: 250px;
+            border-radius: 8px;
+            top: 60%;
+            font-size: 16px;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+
+        select {
+            width: 100px;
+            padding: 0px;
+            border-radius: 4px;
+            border: 1px solid #3D5872;
+            font-size: 16px;
+            background: none;
+            border-color: #3D5872;
+            color: white;
+            text-align: center;
+        }
+
+        .fourm1 {
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            top: 80%;
+        }
+        .model_select{
+             padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            position: absolute;
+            top: 40%;
+            width: 90%;
+            right: 5%;
+
+        }
+        .button1 {
+            top: 45%;
+            position: absolute;
+            align-items: center;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+
+              <button id="logout" type="button" style="position: absolute; right: 0px;height:100% ">
+                <img src="{% static 'logout.png' %}" style="width: 47px;">
+            </button>
+            <button id="data" type="button" style="position: absolute; right: 70px;height:100% ">
+                <img src="{% static 'data.png' %}" style="width: 47px;">
+            </button>
+         <button id="employees" type="button" style="position: absolute; right: 140px;height:100%; ">
+                <img src="{% static 'employees.png' %}" style="width: 47px;">
+            </button>
+            <button id="stations" type="button" style="position: absolute; right: 210px;height:100%;">
+                <img src="{% static 'stations.png' %}" style="width: 47px;">
+            </button>
+            <button id="alerts" type="button" style="position: absolute; right: 280px;height:100% ;background: #FFAE42">
+                <img src="{% static 'alert.png' %}" style="width: 47px;">
+            </button>
+
+        </div>
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">ניהול התראות</div>
+        </div>
+        <div style="top:12%;position: absolute;right:7%;color: #2D2826">
+            <h2>דיווחים פתוחים</h2>
+        </div>
+        <div class="Stations-table" id="Stations-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>אזור</th>
+                        <th>כתובת</th>
+                        <th>סוג דיווח</th>
+                        <th>תאריך פתיחה</th>
+                        <th>שם המדווח</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in open_reports %}
+                    <tr>
+                        <td style="width: 20%">{{ report.area }}</td>
+                        <td style="width: 20%">{{ report.address }}</td>
+                        <td style="width: 20%">{{ report.report_type_label }}</td>
+                        <td style="width: 20%">{{ report.Open_Date|date:"d/m/Y H:i" }}</td>
+                        <td style="width: 20%">{{ report.reporter_name }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="button1">
+            <div class="fourm1">
+                <div style="height: 40px;width: 250px;" class="select-wrapper">
+                    <button id="potentialButton" style="font-size: 20px;height: 100%;background: green;width: 100%;border-radius: 7px;color: white;">
+                        עמדות בפוטנציאל התרוקנות
+                    </button>
+                </div>
+                <div style="height: 40px;width: 250px;" class="select-wrapper">
+                    <button id="modelButton" style="font-size: 20px;height: 100%;background: #3D5872;width: 100%;border-radius: 7px;color: white;">
+                        מודל הזמנת שקיות
+                    </button>
+                </div>
+                <div style="height: 40px; width: 250px;" class="select-wrapper">
+                    <button style="font-size: 20px;height: 100%;background: #3D5872;width: 100%;border-radius: 7px;color: white;">
+                        רגישות להתראות
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="potential-Label" style="top:53%;position: absolute;right:7%;color: #2D2826;">
+            <h2>עמדות בפוטנציאל התרוקנות</h2>
+        </div>
+        <div class="potential-table" id="potential-table" style="max-height: 20%;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>אזור</th>
+                        <th>כתובת</th>
+                        <th>מילוי אחרון</th>
+                        <th>אחוז עמדות שכנות ריקות</th>
+                        <th>שכנים</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for station in last_handling %}
+                    <tr>
+                        <td style="width: 20%">{{ station.Area }}</td>
+                        <td style="width: 20%">{{ station.address }}</td>
+                        <td style="width: 20%">{{ station.last_date|date:"d/m/Y H:i" }}</td>
+                        <td style="width: 20%">{{ station.empty_neighbors_ratio }}</td>
+                        <td>
+                            {% for neighbor in station.neighbors %}
+                                {{ neighbor.address }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="potential-form" class="radius-form">
+            <form id="potential" action="{% url 'managerAlert' %}" method="POST">
+                {% csrf_token %}
+            <input type="hidden" name="form_type" value="potential">
+                <div  class="fourm1">
+                    <div class="select-wrapper">
+                        <label for="radius">רדיוס להגדרת שכנים:</label>
+                        <select style="color:white;background: #3D5872" name="radius">
+                            <option value="50" {% if radius == 50 %}selected{% endif %}>50m</option>
+                            <option value="100" {% if radius == 100 %}selected{% endif %}>100m</option>
+                            <option value="150" {% if radius == 150 %}selected{% endif %}>150m</option>
+                            <option value="200" {% if radius == 200 %}selected{% endif %}>200m</option>
+                            <option value="300" {% if radius == 300 %}selected{% endif %}>300m</option>
+                            <option value="400" {% if radius == 400 %}selected{% endif %}>400m</option>
+                            <option value="500" {% if radius == 500 %}selected{% endif %}>500m</option>
+                        </select>
+                    </div>
+                    <div class="select-wrapper">
+                        <label for="emptyStations">אחוז עמדות שכנות ריקות:</label>
+                        <select style="color:white;background: #3D5872" name="emptyStations" id="emptyStations">
+                            <option value="40" {% if EmptyStaions == 40 %}selected{% endif %}>40%</option>
+                            <option value="50" {% if EmptyStaions == 50 %}selected{% endif %}>50%</option>
+                            <option value="55" {% if EmptyStaions == 55 %}selected{% endif %}>55%</option>
+                            <option value="60" {% if EmptyStaions == 60 %}selected{% endif %}>60%</option>
+                            <option value="65" {% if EmptyStaions == 65 %}selected{% endif %}>65%</option>
+                            <option value="70" {% if EmptyStaions == 70 %}selected{% endif %}>70%</option>
+                            <option value="80" {% if EmptyStaions == 80 %}selected{% endif %}>80%</option>
+                        </select>
+                    </div>
+                    <div class="select-wrapper">
+                        <label for="lastRestock">זמן בשעות מהמילוי האחרון</label>
+                        <select style="color:white;background: #3D5872" name="lastRestock" id="lastRestock">
+                            <option value="24" {% if lastRestock == 24 %}selected{% endif %}>24h</option>
+                            <option value="48" {% if lastRestock == 48 %}selected{% endif %}>48h</option>
+                            <option value="72" {% if lastRestock == 72 %}selected{% endif %}>72h</option>
+                            <option value="96" {% if lastRestock == 96 %}selected{% endif %}>96h</option>
+                        </select>
+                    </div>
+                </div>
+                <button style="color: white;font-size: 25px;background-color: #3D5872;border-radius: 8px; width: 100px" type="submit">עדכן</button>
+            </form>
+        </div>
+
+    <div id="modeldiv" style="top:60%;position: absolute;display:none;color: #2D2826;height: 300px;width: 100% ">
+     <form id="moedelform" action="{% url 'managerAlert' %}" method="POST">
+     <input type="hidden" name="form_type" value="model">
+     {% csrf_token %}
+        <div id="model-Label" style="top:0%;position: absolute;right:7%;color: #2D2826;">
+            <h2>מודל הזמנת שקיות</h2>
+        </div>
+        <div class="model_select" >
+           <div  style="height: 65px;" class="select-wrapper">
+               <label for="stockbags">כמות מילויים במלאי</label>
+               <div style="color:white;background: #3D5872;width: 100%;border-color: #3D5872;border-radius: 8px" id="stockbags">{{ local_authority.Stock_bags }}</div>
+        </div>
+
+        <div style="height: 65px;" class="select-wrapper">
+               <label for="stockbags">ביקוש מילויים שנתי</label>
+               <div style="color:white;background: #3D5872;width: 100%;border-color: #3D5872;border-radius: 8px" id="stockbags">  {{ year_demand }} מילויים</div>
+        </div>
+        <div style="height: 65px;" class="select-wrapper">
+                        <label for="deliverytime">זמן הספקה בשבועות</label>
+                        <select style="color:white;background: #3D5872" name="deliverytime" id="deliverytime">
+                            <option value="1" {% if local_authority.Delivery_time == 1 %}selected{% endif %}>שבוע</option>
+                            <option value="2" {% if local_authority.Delivery_time == 2 %}selected{% endif %}>שבועיים</option>
+                            <option value="3" {% if local_authority.Delivery_time == 3 %}selected{% endif %}>שלושה שבועות</option>
+                            <option value="4" {% if local_authority.Delivery_time == 4 %}selected{% endif %}>ארבעה שבועות</option>
+                        </select>
+        </div>
+        <div style="height: 65px;" class="select-wrapper">
+               <label for="cost">עלות משלוח בשקלים</label>
+              <input type="number" style="height: 40%;text-align: center" name="cost" id="cost" placeholder="{{ cost }}">
+        </div>
+
+        </div>
+       <div style="height: 65px;position: absolute;top: 80%;alignment: center;right: 30%" class="select-wrapper">
+               <label for="stockbags">כמות מילויים במלאי להוצאת הזמנה</label>
+               <div style="color:white;background: #3D5872;width: 100%;border-color: #3D5872;border-radius: 8px" id="stockbags">{{ stock_quantity_make_order }}</div>
+        </div>
+       <div style="height: 65px;position: absolute;top: 80%;alignment: center;right: 60%" class="select-wrapper">
+               <label for="stockbags">כמות שקיות להזמנה</label>
+               <div style="color:white;background: #3D5872;width: 100%;border-color: #3D5872;border-radius: 8px" id="quantityorder">{{ quantity_order }}</div>
+        </div>
+    <button style="color: white;font-size: 25px;background-color: #95C8D8;border-radius: 8px; width: 100px;position: absolute;top: 80%" type="submit">עדכן</button>
+    </form>
+    </div>
+    </div>
+    <script>
+        var table = document.getElementById("potential-table");
+        var label = document.getElementById("potential-Label");
+        var form =  document.getElementById("potential-form");
+        var model=  document.getElementById("modeldiv");
+        var modelbutton=document.getElementById("modelButton");
+        var potentialbutton=document.getElementById("potentialButton");
+        document.getElementById("modelButton").addEventListener("click", function() {
+            table.style.display = "none";
+            label.style.display = "none";
+            form.style.display = "none";
+            model.style.display="block";
+            modelbutton.style.background="green";
+            potentialbutton.style.background="#3D5872";
+            });
+        document.getElementById("potentialButton").addEventListener("click", function() {
+            table.style.display = "block";
+            label.style.display = "block";
+            form.style.display = "block";
+            model.style.display="none";
+            modelbutton.style.background="#3D5872";
+            potentialbutton.style.background="green";
+        });
+        var employeesBtn = document.getElementById("employees");
+        var stationsBtn = document.getElementById("stations");
+        var dataBtn = document.getElementById("data");
+        var logoutBth=document.getElementById("logout");
+          employeesBtn.onclick = function() {
+                window.location.href = "/employees";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+        stationsBtn.onclick = function() {
+                window.location.href = "/stations";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+      dataBtn.onclick = function() {
+                window.location.href = "/manager-dashboard";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+      logoutBth.onclick = function() {
+                window.location.href = "/";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<link rel="stylesheet" href="{% static 'design.css' %}">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee</title>
+</head>
+<style>
+    .employee-table {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 60%;
+        overflow-x: auto;
+        position: absolute;
+        top: 30%;
+        border-radius: 15px;
+    }
+
+    .employee-table table {
+        border-collapse: collapse;
+        border-radius: 15px 15px 0 0;
+        background: white;
+        width: 100%;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .employee-table th, .employee-table td {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .employee-table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: gray;
+        color: white;
+    }
+
+    .employee-table td {
+        border-radius: 0 0 15px 15px;
+        color: #2D2826;
+    }
+
+    .add-employee-form {
+        top: 60%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        width: 80%;
+
+    }
+
+    .add-employee-form table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .add-employee-form td {
+        padding: 10px;
+    }
+
+    .add-employee-form input[type="text"],
+    .add-employee-form input[type="email"],
+    .add-employee-form input[type="password"] {
+        border: none;
+        border-bottom: 2px solid #ccc;
+        outline: none;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        background: whitesmoke;
+    }
+
+    .add-employee-form select {
+        border: none;
+        border-bottom: 2px solid #ccc;
+        outline: none;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: transparent;
+    }
+
+    .add-employee-form button {
+        margin-top: 20px;
+        width: 50%;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .action-buttons form, .action-buttons a {
+        margin: 0 5px;
+    }
+
+    .action-buttons button, .action-buttons a {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .action-buttons button.delete {
+        background-color: #f44336;
+    }
+
+    .action-buttons a.edit {
+        background-color: #008CBA;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="top-bar">
+
+               <button id="logout" type="button" style="position: absolute; right: 0px;height:100% ">
+                <img src="{% static 'logout.png' %}" style="width: 47px;">
+            </button>
+            <button id="data" type="button" style="position: absolute; right: 70px;height:100% ">
+                <img src="{% static 'data.png' %}" style="width: 47px;">
+            </button>
+         <button id="employees" type="button" style="position: absolute; right: 140px;height:100%;background: #FFAE42; ">
+                <img src="{% static 'employees.png' %}" style="width: 47px;">
+            </button>
+            <button id="stations" type="button" style="position: absolute; right: 210px;height:100%; ">
+                <img src="{% static 'stations.png' %}" style="width: 47px;">
+            </button>
+            <button id="alerts" type="button" style="position: absolute; right: 280px;height:100% ">
+                <img src="{% static 'alert.png' %}" style="width: 47px;">
+            </button>
+
+
+        </div>
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">ניהול עובדים</div>
+        </div>
+        <div class="employee-table" id="employee-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>שם פרטי</th>
+                        <th>שם משפחה</th>
+                        <th>מס' טלפון</th>
+                        <th>מייל</th>
+                        <th>פעולה</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                        <tr>
+                            <td>{{ employee.First_Name }}</td>
+                            <td>{{ employee.Last_Name }}</td>
+                            <td>{{ employee.Employee_Phone_Number }}</td>
+                            <td>{{ employee.Employee_Mail }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <form method="post" action="{% url 'delete_employee' employee.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete">מחק</button>
+                                    </form>
+                                    <a href="{% url 'edit_employee' employee.id %}" class="edit">ערוך</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="add-employee-form" id="add-employee-form">
+            <form method="post" action="{% url 'add_employee' %}">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td><input type="text" name="first_name" placeholder="שם פרטי" required></td>
+                        <td><input type="text" name="last_name" placeholder="שם משפחה" required></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="phone_number" placeholder="מס' טלפון" required></td>
+                        <td><input type="email" name="email" placeholder="מייל" required></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="user_name" placeholder="שם משתמש" required></td>
+                        <td><input type="password" placeholder="סיסמא" name="password1" id="password"  maxlength="150" required></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <select name="employee_type" required>
+                                <option value="">בחר סוג עובד</option>
+                                <option value="manager">מנהל</option>
+                                <option value="employee">עובד</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <button type="submit">הוסף עובד</button>
+                        </td>
+                    </tr>
+                </table>
+                {% if error_message %}
+                    <div class="error-message">{{ error_message }}</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <script>
+        function showForm(formType, employeeId = null) {
+            document.getElementById('employee-table').style.display = 'none';
+            document.getElementById('add-employee-form').style.display = 'none';
+            document.getElementById('edit-employee-form').style.display = 'none';
+
+            if (formType === 'add') {
+                document.getElementById('add-employee-form').style.display = 'flex';
+            } else if (formType === 'edit' && employeeId) {
+                document.getElementById('edit-employee-form').style.display = 'flex';
+                document.getElementById('edit-employee-form').action = `/edit_employee/${employeeId}/`;
+            }
+        }
+
+        function showTable() {
+            document.getElementById('employee-table').style.display = 'flex';
+            document.getElementById('add-employee-form').style.display = 'none';
+            document.getElementById('edit-employee-form').style.display = 'none';
+        }
+
+
+        var dataBtn = document.getElementById("data");
+        var stationsBtn = document.getElementById("stations");
+        var alertsBtn = document.getElementById("alerts");
+        var logoutBth=document.getElementById("logout");
+          dataBtn.onclick = function() {
+                    window.location.href = "/manager-dashboard";  // העברה לעמוד ההתחברות עם ID העמדה
+                }
+          stationsBtn.onclick = function() {
+                    window.location.href = "/stations";  // העברה לעמוד ההתחברות עם ID העמדה
+                }
+          alertsBtn.onclick = function() {
+                    window.location.href = "/managerAlert";  // העברה לעמוד ההתחברות עם ID העמדה
+                }
+                logoutBth.onclick = function() {
+                window.location.href = "/";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+    </script>
+</body>
+</html>

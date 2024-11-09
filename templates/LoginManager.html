@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar"></div>
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">ברוכים הבאים</div>
+        </div>
+
+        <form class='loginForm' action="{% url 'check_user_manager' %}" name="LoginForm" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="station_id" value="{{ station_id }}">
+            <input type="text" placeholder="שם משתמש" name="username" id="username" class='login-signup-input' autocomplete="off" maxlength="150" required="">
+            <input type="password" placeholder="סיסמא" name="password" id="password" class='login-signup-input' maxlength="150" required="">
+
+            {% if error %}
+            <p class="error">{{ error }}</p>
+            {% endif %}
+
+            <button type="submit" class="login-btn">התחברות</button>
+        </form>
+
+        <div class="title-down1">
+            <h3>Doggy Doo</h3>
+            <h3>עיר נקייה, כלבים שמחים</h3>
+
+        </div>
+        <div class="rectangle"></div>
+        <div class="ellipse"></div>
+    </div>
+</body>
+</html>

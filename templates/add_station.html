@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Station</title>
+</head>
+<body>
+    <div class="container">
+        <h1>הוסף עמדה</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">הוסף עמדה</button>
+        </form>
+    </div>
+</body>
+</html>

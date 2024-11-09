@@ -1,0 +1,263 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<link rel="stylesheet" href="{% static 'design.css' %}">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stations</title>
+</head>
+<style>
+    .Stations-table {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60%;
+    overflow-x: auto;
+    position: absolute;
+    top: 20%;
+    border-radius: 15px;
+    height: 500px;
+}
+
+.Stations-table thead {
+    position: sticky;
+    top: 0;
+    background-color: white; /* You can adjust this to match your design */
+    z-index: 1; /* Ensures it stays on top while scrolling */
+}
+
+.Stations-table th {
+    padding: 10px;
+    text-align: left;
+    background-color: #f2f2f2; /* Change this for header styling */
+    border-bottom: 2px solid #ddd; /* Add a border to the header */
+}
+
+    .Stations-table table {
+        border-collapse: collapse;
+        border-radius: 15px 15px 0 0;
+        background: white;
+        width: 100%;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .Stations-table th, .employee-table td {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .Stations-table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: gray;
+        color: white;
+    }
+
+    .Stations-table td {
+        border-radius: 0 0 15px 15px;
+        color: #2D2826;
+    }
+
+    .add-Station-form {
+        top: 70%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        width: 80%;
+        background: whitesmoke;
+    }
+
+    .add-Station-form table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .add-Station-form td {
+        padding: 10px;
+    }
+
+    .add-Station-form input[type="text"],
+    .add-Station-form input[type="number"]
+    .add-Station-form select {
+        border: none;
+        border-bottom: 2px solid #ccc;
+        outline: none;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: transparent;
+    }
+
+
+
+    .add-Station-form button {
+        margin-top: 30px;
+        width: 50%;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .action-buttons form, .action-buttons a {
+        margin: 0 5px;
+    }
+
+    .action-buttons button, .action-buttons a {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .action-buttons button.delete {
+        background-color: #f44336;
+    }
+
+    .action-buttons a.edit {
+        background-color: #008CBA;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="top-bar">
+         <button id="logout" type="button" style="position: absolute; right: 0px;height:100% ">
+                <img src="{% static 'logout.png' %}" style="width: 47px;">
+            </button>
+            <button id="data" type="button" style="position: absolute; right: 70px;height:100% ">
+                <img src="{% static 'data.png' %}" style="width: 47px;">
+            </button>
+         <button id="employees" type="button" style="position: absolute; right: 140px;height:100% ">
+                <img src="{% static 'employees.png' %}" style="width: 47px;">
+            </button>
+            <button id="stations" type="button" style="position: absolute; right: 210px;height:100%;background: #FFAE42 ">
+                <img src="{% static 'stations.png' %}" style="width: 47px;">
+            </button>
+            <button id="alerts" type="button" style="position: absolute; right: 280px;height:100% ">
+                <img src="{% static 'alert.png' %}" style="width: 47px;">
+            </button>
+
+        </div>
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">ניהול עמדות</div>
+        </div>
+        <div class="Stations-table" id="Stations-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>אזור</th>
+                        <th>כתובת</th>
+                        <th>סטטוס שקיות</th>
+                        <th>סטטוס אזור</th>
+                        <th>פעולה</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for station in stations|slice:":20" %}
+                        <tr>
+
+                            <td>{{ station.Area }}</td>
+                            <td>{{ station.address }}</td>
+                            <td>
+                                {% if station.Bags_Status == 'empty' %}
+                                    ריקה
+                                {% elif station.Bags_Status == 'not empty' %}
+                                    לא ריקה
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if station.Dirty_Area == 'clean' %}
+                                    נקי
+                                {% elif station.Dirty_Area == 'dirty' %}
+                                    מלוכלך
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <form method="post" action="{% url 'delete_station' station.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete">מחק</button>
+                                    </form>
+                                    <a href="{% url 'edit_station' station.id %}" class="edit">ערוך</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="add-Station-form" id="add-Station-form">
+            <form method="post" action="{% url 'add_station' %}">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td><input type="text" name="address" value="{{ station.address}}" placeholder=" כתובת" required></td>
+                        <td><input type="text" name="Area" placeholder="אזור" required></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="lat"  placeholder="אורך" required></td>
+                        <td><input type="text" name="lng"  placeholder="רוחב" required></td>
+
+
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <button type="submit">הוסף עמדה</button>
+                        </td>
+                    </tr>
+                </table>
+                {% if error_message %}
+                    <div class="error-message">{{ error_message }}</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <script>
+        function showForm(formType, StationId = null) {
+            document.getElementById('Stationד-table').style.display = 'none';
+            document.getElementById('add-Station-form').style.display = 'none';
+            document.getElementById('edit-Station-form').style.display = 'none';
+
+            if (formType === 'add') {
+                document.getElementById('add-Station-form').style.display = 'flex';
+            } else if (formType === 'edit' && employeeId) {
+                document.getElementById('edit-Station-form').style.display = 'flex';
+                document.getElementById('edit-Station-form').action = `/edit_employee/${StationId}/`;
+            }
+        }
+
+        function showTable() {
+            document.getElementById('Station-table').style.display = 'flex';
+            document.getElementById('add-Station-form').style.display = 'none';
+            document.getElementById('edit-Station-form').style.display = 'none';
+        }
+
+        var employeesBtn = document.getElementById("employees");
+        var alertsBtn = document.getElementById("alerts");
+        var dataBtn = document.getElementById("data");
+        var logoutBth=document.getElementById("logout");
+          employeesBtn.onclick = function() {
+                window.location.href = "/employees";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+        alertsBtn.onclick = function() {
+                window.location.href = "/managerAlert";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+      dataBtn.onclick = function() {
+                window.location.href = "/manager-dashboard";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+            logoutBth.onclick = function() {
+                window.location.href = "/";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+    </script>
+</body>
+</html>

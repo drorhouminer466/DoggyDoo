@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChooseClosestStation</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+    <style>
+        #map {
+            height: 270px; /* Adjust height as needed */
+            width: 90%; /* Full width */
+            top: 43%;
+            position: absolute;
+            border-radius: 20px;
+        }
+        table {
+            width: 40%;
+            border-collapse: collapse;
+            top: 30%;
+            background-color: #fff;
+            overflow-x: auto; /* Enable horizontal scrolling on smaller screens */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+            color: #2D2826;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        @media screen and (max-width: 435px) {
+            th {
+                padding: 4px;
+                font-size: 20px;
+                text-align: center;
+            }
+            td {
+                padding: 4px;
+                font-size: 20px;
+                text-align: right;
+            }
+            table {
+                width: 10%;
+                top: 25%;
+                overflow-x: auto;
+                white-space: nowrap;
+                border-radius: 15px;
+            }
+            .table-wrapper {
+                overflow-y: auto;
+                border: 1px solid #ccc;
+                position: absolute;
+                top: 15%;
+                max-height: 30%;
+                border-radius: 15px;
+                text-align: right;
+            }
+        }
+        .title-down2 {
+            width: 180px;
+            position: absolute;
+            z-index: 3;
+            top: 83%;
+            height: 50px;
+            font-size: 20px;
+            align-items: center;
+            text-align: center;
+            color: #cc1165;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPcq91h23PPgbig6dU4HOnDNS2q2HIwyk"></script>
+    <div class="container">
+        <div class="top-bar" style="background-color: #99CAD9;">
+            <img src="{% static 'dog.png' %}" style="position: absolute; left: 0px;border-radius: 15px;width: 70px;top: -8%">
+            <button id="main-page" type="button" style="position: absolute; right: 0px;border-radius: 15px;">
+                <img src="{% static 'home.png' %}" style="width: 47px;">
+            </button>
+        </div>
+        <div style="top:7%" class="titles">
+            <div class="title-app">בחירת עמדה מלאה</div>
+        </div>
+        <div style="position: absolute;top: 33%;color: #2D2826;font-size:20px;">
+            <label for="stationCount">יש לבחור מספר עמדות להצגה:</label>
+            <select style="width: 25%;font-size: 15px" id="stationCount" onchange="updateTable()">
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+            </select>
+        </div>
+        <div style="top: 13%" class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>כתובת</th>
+                        <th>מרחק אווירי</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for station in stations %}
+                    <tr data-lat="{{ station.location_coordinates.lat }}" data-lng="{{ station.location_coordinates.lng }}">
+                        <td>{{ station.address }}</td>
+                        <td>{{ station.distance_from_station1 }} מטרים </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="map"></div>
+        <div id="route-info" style="position: absolute; top: 77%; width: 80%; display: none; z-index: 4;">
+            <div id="distance"></div>
+            <div id="duration"></div>
+            <button onclick="startNavigation()" style="position: absolute; right: 45%;">נווט</button>
+        </div>
+        <div class="title-down2">
+            <h3 style="top: 0%">Doggy Doo</h3>
+            <h3 style="top: 20%">עיר נקייה, כלבים שמחים</h3>
+        </div>
+        <div class="rectangle" style="background-color: #99cad9; z-index: 1;"></div>
+        <div class="ellipse"></div>
+    </div>
+    <script>
+        let directionsRenderer;
+        let currentStation = { lat: {{ current_station.location_coordinates.lat }}, lng: {{ current_station.location_coordinates.lng }} };
+        let selectedDestination = null;
+
+        function initMap() {
+            const mapOptions = {
+                center: currentStation,
+                zoom: 16
+            };
+            const map = new google.maps.Map(document.getElementById('map'), mapOptions);
+            const marker = new google.maps.Marker({ position: currentStation, map: map, title: "Current Station" });
+
+            document.querySelectorAll('tbody tr').forEach(row => {
+                row.addEventListener('click', function() {
+                    const lat = parseFloat(this.dataset.lat);
+                    const lng = parseFloat(this.dataset.lng);
+                    selectedDestination = { lat: lat, lng: lng };
+
+                    const directionsService = new google.maps.DirectionsService();
+
+                    if (directionsRenderer) {
+                        directionsRenderer.setMap(null);
+                    }
+
+                    directionsRenderer = new google.maps.DirectionsRenderer();
+                    directionsRenderer.setMap(map);
+
+                    const request = {
+                        origin: currentStation,
+                        destination: selectedDestination,
+                        travelMode: 'WALKING'
+                    };
+
+                    directionsService.route(request, function(result, status) {
+                        if (status === 'OK') {
+                            directionsRenderer.setDirections(result);
+                            const route = result.routes[0].legs[0];
+                            document.getElementById('distance').innerText = `מרחק: ${route.distance.text}`;
+                            document.getElementById('duration').innerText = `זמן הליכה: ${route.duration.text}`;
+                            document.getElementById('route-info').style.display = 'block';
+                        }
+                    });
+                });
+            });
+        }
+
+        function updateTable() {
+            const count = parseInt(document.getElementById('stationCount').value);
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach((row, index) => {
+                row.style.display = index < count ? '' : 'none';
+            });
+        }
+
+        function startNavigation() {
+            if (selectedDestination) {
+                window.location.href = `https://www.google.com/maps/dir/?api=1&origin=${currentStation.lat},${currentStation.lng}&destination=${selectedDestination.lat},${selectedDestination.lng}&travelmode=walking`;
+            }
+        }
+
+        window.onload = () => {
+            initMap();
+            updateTable();
+        };
+
+        const mainPage = document.getElementById("main-page");
+        mainPage.onclick = function() {
+            window.location.href = "/mainwindow/{{ current_station.id }}";  // Navigate to main window
+        };
+    </script>
+</body>
+</html>

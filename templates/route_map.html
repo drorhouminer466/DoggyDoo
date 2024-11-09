@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Map</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPcq91h23PPgbig6dU4HOnDNS2q2HIwyk"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .route-info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .navigate-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>מסלול בין עמדות נבחרות</h2>
+    <div id="map"></div>
+    <div class="route-info" id="route-info"></div>
+    <button class="navigate-button" onclick="startNavigate()">התחל נווט</button>
+
+    <script>
+        function initMap() {
+            var mapOptions = {
+                zoom: 16,
+                center: { lat: 32.08305129277888, lng: 34.780481341677955 },  // Default center: Tel Aviv
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            var routeCoordinates = [
+                {% for station in route %}
+                { lat: {{ station.1.0 }}, lng: {{ station.1.1 }} },
+                {% endfor %}
+            ];
+
+            var routePath = new google.maps.Polyline({
+                path: routeCoordinates,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+
+            routePath.setMap(map);
+
+            // Add markers
+            {% for station in route %}
+            new google.maps.Marker({
+                position: { lat: {{ station.1.0 }}, lng: {{ station.1.1 }} },
+                map: map,
+                title: '{{ station.0 }}'
+            });
+            {% endfor %}
+
+            // Calculate route details
+            calculateRouteDetails(routeCoordinates);
+        }
+
+        function calculateRouteDetails(routeCoordinates) {
+            var service = new google.maps.DistanceMatrixService();
+            var origin = routeCoordinates[0];
+            var destination = routeCoordinates[routeCoordinates.length - 1];
+            var waypoints = routeCoordinates.slice(1, -1).map(coord => ({ location: coord, stopover: true }));
+
+            service.getDistanceMatrix({
+                origins: [origin],
+                destinations: [destination],
+                travelMode: 'DRIVING',
+                waypoints: waypoints
+            }, function(response, status) {
+                if (status === 'OK') {
+                    var results = response.rows[0].elements;
+                    var totalDuration = results.reduce((sum, element) => sum + element.duration.value, 0);
+                    var totalDistance = results.reduce((sum, element) => sum + element.distance.value, 0);
+
+                    var hours = Math.floor(totalDuration / 3600);
+                    var minutes = Math.floor((totalDuration % 3600) / 60);
+
+                    var routeInfo = `זמן נסיעה משוער: ${hours} שעות ${minutes} דקות<br>מרחק כולל: ${(totalDistance / 1000).toFixed(2)} ק"מ`;
+                    document.getElementById('route-info').innerHTML = routeInfo;
+                } else {
+                    console.error('Distance Matrix request failed due to ' + status);
+                }
+            });
+        }
+
+   function startNavigate() {
+    var startCoords = { lat: 32.08305129277888, lng: 34.780481341677955 };  // Predefined starting point (Tel Aviv, for example)
+    var destination = { lat: {{ last_station_coords.0 }}, lng: {{ last_station_coords.1 }} };
+
+    // Collect all station waypoints (excluding the first and last)
+    var waypoints = [
+        {% for station in route %}
+        { lat: {{ station.1.0 }}, lng: {{ station.1.1 }} },
+        {% endfor %}
+    ].slice(1, -1);  // Get all waypoints except the first (start) and last (destination)
+
+    // Format the waypoints for the Google Maps URL
+    var waypointsParam = waypoints.map(coord => `${coord.lat},${coord.lng}`).join('|');
+
+    // Build the Google Maps URL with waypoints
+    var googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${startCoords.lat},${startCoords.lng}&destination=${destination.lat},${destination.lng}&waypoints=${waypointsParam}&travelmode=driving`;
+
+    // Redirect to Google Maps
+    window.location.href = googleMapsUrl;
+}
+
+        google.maps.event.addDomListener(window, 'load', initMap);
+    </script>
+</body>
+</html>

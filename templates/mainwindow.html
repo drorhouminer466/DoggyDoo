@@ -1,0 +1,427 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Window</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .alert {
+            padding: 20px;
+            background-color: #f44336;
+            color: white;
+            margin-bottom: 15px;
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 80%;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .alert.success {
+            background-color: #4CAF50;
+        }
+
+        .alert .closebtn {
+            margin-left: 15px;
+            color: white;
+            font-weight: bold;
+            float: right;
+            font-size: 22px;
+            line-height: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .alert .closebtn:hover {
+            color: black;
+        }
+
+        #map {
+            height: 230px;
+            width: 80%;
+            top: 40%;
+            position: absolute;
+        }
+
+        table {
+            width: 40%;
+            border-collapse: collapse;
+            background-color: #fff;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            color: black;
+            word-break: break-word;
+            max-width: 100px;
+        }
+
+        th {
+            background-color: whitesmoke;
+            font-weight: bold;
+        }
+
+        @media screen and (max-width: 435px) {
+            th, td {
+                padding: 4px;
+                font-size: 30px;
+                text-align: center;
+                vertical-align: top;
+                border-color: whitesmoke;
+            }
+            table {
+                position: absolute;
+                width: 90%;
+                height: 50%;
+                top: 20%;
+                border-collapse: collapse;
+                border-color: whitesmoke;
+                background-color: whitesmoke;
+                overflow-x: auto;
+                table-layout: fixed;
+            }
+            .table-wrapper {
+                max-height: 200px;
+                overflow-y: auto;
+                border: 1px solid #ccc;
+                position: absolute;
+                top: 20%;
+            }
+        }
+
+
+        .title-down2{
+
+    width: 180px;
+    position: absolute;
+    z-index: 3;
+    top: 70%;
+    height: 250px;
+    font-size: 25px;
+    align-items: center;
+    text-align: center;
+    color: #cc1165;
+}
+
+.dog-img2 {
+    z-index: 2;
+    width: 100px;
+    display: block;
+    position: absolute;
+    bottom: 0%;
+    left: 15%;
+    alignment: center;
+
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar" style="background-color: #99CAD9;" >
+            <button id="admin" type="button" style="position: absolute; right: 0px;">
+                <img src="{% static 'admin.png' %}" style="width: 47px;">
+            </button>
+        </div>
+        <div class="titles">
+            <div style="font-size: 25px;" class="title-app"> הגעת לעמדה "{{ current_station.address }}"</div>
+{#            <div style="font-size: 30px; color:#2D2826; vertical-align: top">עזור לנו לדעת:</div>#}
+        </div>
+
+        <table>
+            <tr>
+                <td>
+                    <h6 style="vertical-align: top">שתפו אותנו במידה והעמדה ריקה</h6>
+                    <button id="bagReportBtn" name="bag_report" style="width: 70%; height: 20%; border-radius:30px;">דווח</button>
+                </td>
+                <td>
+                    <h6 style="vertical-align: top">שתפו אותנו אם איזור העמדה מלוכלך </h6>
+                    <button id="areaReportBtn" style="width: 70%; height: 20%; border-radius:30px;">דווח</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h6 style="vertical-align: top">מצאו עמדות מלאות קרובות</h6>
+                    <button id ="findStation" style="width: 70%; height: 20%; border-radius:30px;">מצא לי עמדה</button>
+                </td>
+                <td>
+                    <h6 style="vertical-align: top">שתפו אותנו בחוויה שלכם</h6>
+                    <button id="contactBtn" style="width: 70%; height: 20%; vertical-align: bottom; border-radius:30px;">צור קשר</button>
+                </td>
+            </tr>
+        </table>
+
+        <div class="title-down2">
+            <h3 style="top: 20%">Doggy Doo</h3>
+            <h3 style="top: 40%">עיר נקייה, כלבים שמחים</h3>
+
+            <img src="{% static 'dog.png' %}" class="dog-img2">
+        </div>
+        <div class="rectangle" style="background-color: #99CAD9;"></div>
+        <div class="ellipse"></div>
+
+        <!-- The Modal for Bag Report -->
+        <div id="bagReportModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>דווח עמדה ריקה</h2>
+                <form id="reportForm" method="POST" action="{% url 'report_view' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="station_id" name="station_id" value="{{ current_station.id }}">
+                    <input type="hidden" id="report_type" name="report_type" value="Bag">
+                    <label for="name">שם:</label><br>
+                    <input type="text" id="name" name="name" required><br><br>
+                    <label for="email">אימייל:</label><br>
+                    <input type="email" id="email" name="email"><br><br>
+                    <label for="phone">מספר טלפון:</label><br>
+                    <input type="text" id="phone" name="phone"><br><br>
+                    <button type="submit">דווח</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- The Modal for Area Report -->
+        <div id="areaReportModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>דווח על איזור מלוכלך</h2>
+                <form id="areaReportForm" method="POST" action="{% url 'report_view' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="station_id" name="station_id" value="{{ current_station.id }}">
+                    <input type="hidden" id="report_type" name="report_type" value="Area">
+                    <label for="name">שם:</label><br>
+                    <input type="text" id="name" name="name" required><br><br>
+                    <label for="email">אימייל:</label><br>
+                    <input type="email" id="email" name="email"><br><br>
+                    <label for="phone">מספר טלפון:</label><br>
+                    <input type="text" id="phone" name="phone"><br><br>
+                    <label for="image">תמונה:</label><br>
+                    <input type="file" id="image" name="image" accept="image/*"><br><br>
+                    <button type="submit">דווח</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- The Modal for Contact -->
+        <div id="contactModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>צור קשר</h2>
+                <form id="contactForm" method="POST" action="{% url 'contact_view' %}">
+                    {% csrf_token %}
+                    <label for="name">שם:</label><br>
+                    <input type="text" id="name" name="name" required><br><br>
+                    <label for="email">אימייל:</label><br>
+                    <input type="email" id="email" name="email"><br><br>
+                    <label for="phone">מספר טלפון:</label><br>
+                    <input type="text" id="phone" name="phone"><br><br>
+                    <label for="message">הודעה:</label><br>
+                    <textarea id="message" name="message" required></textarea><br><br>
+                    <button type="submit">שלח</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="alert-container" class="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <span id="alert-message"></span>
+        </div>
+
+        <script>
+            // Get the modals
+            var bagModal = document.getElementById("bagReportModal");
+            var areaModal = document.getElementById("areaReportModal");
+            var contactModal = document.getElementById("contactModal");
+
+            // Get the buttons that open the modals
+            var bagBtn = document.getElementById("bagReportBtn");
+            var areaBtn = document.getElementById("areaReportBtn");
+            var contactBtn = document.getElementById("contactBtn");
+            var adminBtn = document.getElementById("admin");
+            var findStation = document.getElementById("findStation") // כפתור מנהל
+
+            // Get the <span> elements that close the modals
+            var bagSpan = bagModal.getElementsByClassName("close")[0];
+            var areaSpan = areaModal.getElementsByClassName("close")[0];
+            var contactSpan = contactModal.getElementsByClassName("close")[0];
+
+            // When the user clicks the button, open the modal
+            bagBtn.onclick = function() {
+                bagModal.style.display = "block";
+            }
+            areaBtn.onclick = function() {
+                areaModal.style.display = "block";
+            }
+            contactBtn.onclick = function() {
+                contactModal.style.display = "block";
+            }
+            adminBtn.onclick = function() {
+                window.location.href = "/login/{{ current_station.id }}";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+
+            findStation.onclick = function() {
+                window.location.href = "/findstation/{{ current_station.id }}";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+
+
+            // When the user clicks on <span> (x), close the modal
+            bagSpan.onclick = function() {
+                bagModal.style.display = "none";
+            }
+            areaSpan.onclick = function() {
+                areaModal.style.display = "none";
+            }
+            contactSpan.onclick = function() {
+                contactModal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+                if (event.target == bagModal) {
+                    bagModal.style.display = "none";
+                }
+                if (event.target == areaModal) {
+                    areaModal.style.display = "none";
+                }
+                if (event.target == contactModal) {
+                    contactModal.style.display = "none";
+                }
+            }
+
+            // Handle form submission for bag report
+            document.getElementById("reportForm").onsubmit = function(event) {
+                event.preventDefault();  // Prevent default form submission
+
+                var formData = new FormData(this);
+
+                fetch("{% url 'report_view' %}", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showMessage(data.message);
+                    bagModal.style.display = "none";  // סגירת ה-modal
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            };
+
+            // Handle form submission for area report
+            document.getElementById("areaReportForm").onsubmit = function(event) {
+                event.preventDefault();  // Prevent default form submission
+
+                var formData = new FormData(this);
+
+                fetch("{% url 'report_view' %}", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showMessage(data.message);
+                    areaModal.style.display = "none";  // סגירת ה-modal
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            };
+
+            // Handle form submission for contact
+            document.getElementById("contactForm").onsubmit = function(event) {
+                event.preventDefault();  // Prevent default form submission
+
+                var formData = new FormData(this);
+
+                var email = formData.get('email');
+                var phone = formData.get('phone');
+                if (!email && !phone) {
+                    showMessage("חובה להשאיר אימייל או מספר טלפון.");
+                    return;
+                }
+
+                fetch("{% url 'contact_view' %}", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showMessage(data.message);
+                    if (data.message !== "חובה להשאיר אימייל או מספר טלפון.") {
+                        contactModal.style.display = "none";  // סגירת ה-modal
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            };
+
+             function showMessage(message) {
+            var alertContainer = document.getElementById("alert-container");
+            var alertMessage = document.getElementById("alert-message");
+            var background_color = message.includes("בהצלחה") ? "green" : "red";
+            alertMessage.textContent = message;
+            alertContainer.style.background = background_color
+            alertContainer.style.display = "block";
+
+            setTimeout(function() {
+                alertContainer.style.display = 'none';
+            }, 5000);
+        }
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stations</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 20px;
+            margin: auto;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .Stations-table, .potential-table {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: skyblue;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        td {
+            color: #2D2826;
+        }
+
+        .titles {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title-app, .title-page {
+            font-size: 24px;
+            color: #2D2826;
+        }
+
+        .radius-form {
+            margin: 20px 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .select-wrapper {
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+
+        select {
+            width: 100%;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #3D5872;
+            font-size: 16px;
+            background: #3D5872;
+            color: white;
+            text-align: center;
+        }
+
+        .fourm1 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3D5872;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Media Queries for iPhone 14 Pro Max (max-width 430px) */
+        @media (max-width: 431px) {
+            .container {
+                padding: 10px;
+            }
+
+            th, td {
+                font-size: 14px;
+                padding: 5px;
+            }
+
+            .Stations-table, .potential-table {
+                width: 90%;
+                margin: 10px 0;
+            }
+
+            .titles {
+                margin-bottom: 10px;
+            }
+
+            .title-app, .title-page {
+                font-size: 20px;
+            }
+
+            label {
+                font-size: 16px;
+            }
+
+            select {
+                font-size: 14px;
+            }
+
+            .submit-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+                width: 100%;
+            }
+
+            .top-bar {
+    height: 6%; /* Adjust height of rectangle */ /* 150/2 + 20 = 90*/
+    width: 100%; /* Adjust width of rectangle */
+    background-color: #6ECAFE;
+    position: absolute;
+    top: 0; /* Positioning the rectangle at the bottom */
+}
+
+            /* Reduce form layout gap */
+            .fourm1 {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <button id="logout" type="button" style="position: absolute; right: 0px;height:100% ">
+                <img src="{% static 'logout.png' %}" style="width: 47px;">
+            </button>
+
+
+        </div>
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">ניהול התראות עובד</div>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 1px;">
+            <h2>דיווחים פתוחים</h2>
+        </div>
+
+        <!-- Multi-Select Form -->
+        <div class="Stations-table">
+            <form id="station-selection-form" action="{% url 'route_map' %}" method="POST">
+                {% csrf_token %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>בחר</th>
+                            <th>אזור</th>
+                            <th>כתובת</th>
+                            <th>סוג דיווח</th>
+                            <th>תאריך פתיחה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in open_reports %}
+                        <tr>
+                            <td><input type="checkbox" name="selected_stations" value="{{ report.station_id }}"></td>
+                            <td>{{ report.area }}</td>
+                            <td>{{ report.address }}</td>
+                            <td>{{ report.report_type_label }}</td>
+                            <td>{{ report.Open_Date|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="submit-btn">צור מסלול</button>
+            </form>
+        </div>
+
+        <div style="text-align: right; margin-bottom: 10px;">
+            <h2>עמדות בפוטנציאל התרוקנות</h2>
+        </div>
+
+        <div class="potential-table">
+        <form id="station-selection-form" action="{% url 'route_map' %}" method="POST">
+         {% csrf_token %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>בחר</th>
+                        <th>אזור</th>
+                        <th>כתובת</th>
+                        <th>מילוי אחרון</th>
+                        <th>אחוז עמדות שכנות ריקות</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for station in last_handling %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_stations" value="{{ station.id }}"></td>
+                        <td>{{ station.Area }}</td>
+                        <td>{{ station.address }}</td>
+                        <td>{{ station.last_date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ station.empty_neighbors_ratio }}</td>
+
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        <button type="submit" class="submit-btn">צור מסלול</button>
+        </form>
+        </div>
+
+
+
+    </div>
+
+<SCRIPT>
+
+var logoutBth=document.getElementById("logout");
+
+            logoutBth.onclick = function() {
+                window.location.href = "/";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+
+</SCRIPT>
+</body>
+</html>

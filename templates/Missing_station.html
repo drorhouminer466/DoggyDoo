@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<link rel="stylesheet" href="{% static 'design.css' %}">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>employeeAlert</title>
+</head>
+<style>
+    .Stations-table {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 70%;
+        overflow-x: auto;
+        position: absolute;
+        top: 20%;
+        border-radius: 15px;
+    }
+
+    .Stations-table table {
+        border-collapse: collapse;
+        border-radius: 15px 15px 0 0;
+        background: white;
+        width: 100%;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    .Stations-table th, .employee-table td {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .Stations-table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: gray;
+        color: white;
+    }
+
+    .Stations-table td {
+        border-radius: 0 0 15px 15px;
+        color: #2D2826;
+    }
+
+    .add-Station-form {
+        top: 70%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        width: 80%;
+        background: whitesmoke;
+    }
+
+    .add-Station-form table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .add-Station-form td {
+        padding: 10px;
+    }
+
+    .add-Station-form input[type="text"],
+    .add-Station-form input[type="number"]
+    .add-Station-form select {
+        border: none;
+        border-bottom: 2px solid #ccc;
+        outline: none;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: transparent;
+    }
+
+    .add-Station-form button {
+        margin-top: 30px;
+        width: 50%;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .action-buttons form, .action-buttons a {
+        margin: 0 5px;
+    }
+
+    .action-buttons button, .action-buttons a {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .action-buttons button.delete {
+        background-color: #f44336;
+    }
+
+    .action-buttons a.edit {
+        background-color: #008CBA;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="top-bar"></div>
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div style="color: red" class="title-page">לא זוהתה עמדה, אנא סרוק מחדש</div>
+        </div>
+    </div>
+
+
+
+</body>
+</html>

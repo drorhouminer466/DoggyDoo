@@ -1,0 +1,208 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Handle</title>
+    <link rel="stylesheet" href="{% static 'design.css' %}">
+</head>
+<style>
+    #map {
+        height: 230px; /* Adjust height as needed */
+        width: 80%; /* Full width */
+        top: 40%;
+        position: absolute;
+    }
+    table {
+        width: 40%;
+        border-collapse: collapse;
+        background-color: #fff;
+        table-layout: fixed;
+    }
+
+    th, td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: center;
+        color: black;
+        word-break: break-word;
+        max-width: 100px;
+    }
+
+    th {
+        background-color:whitesmoke;
+        font-weight: bold;
+    }
+
+    @media screen and (max-width: 435px) {
+        th, td {
+            padding: 4px;
+            font-size: 30px;
+            text-align: center;
+
+            vertical-align: top;
+            border-color: whitesmoke;
+            horiz-align: center;
+        }
+        table {
+            vertical-align: top;
+            position: absolute;
+            width: 90%;
+            height: 50%;
+            top: 25%;
+            border-collapse: collapse;
+            border-color: whitesmoke;
+            background-color: whitesmoke;
+            overflow-x: auto;
+            table-layout: fixed;
+        }
+        .table-wrapper {
+            max-height: 200px; /* Adjust height as needed */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            position: absolute;
+            top: 20%;
+        }
+    }
+
+    .alert {
+        padding: 20px;
+        background-color: #f44336;
+        color: white;
+        margin-bottom: 15px;
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        width: 80%;
+        text-align: center;
+        border-radius: 5px;
+    }
+
+    .alert.success {
+        background-color: #4CAF50;
+    }
+
+    .alert .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .alert .closebtn:hover {
+        color: black;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="top-bar" style="background-color: #99CAD9;">
+
+            <button id="logout" type="button" style="position: absolute; right: 10px;height:100% ">
+                <img src="{% static 'logout.png' %}" style="width: 47px;">
+            </button>
+        </div>
+        <div class="titles">
+            <div class="title-app">טיפול בדיווחים</div>
+            <div style="font-size: 30px; color:#2D2826; vertical-align: top">לאחר הטיפול בדיווח, נא לעדכן סטאטוס</div>
+        </div>
+
+        <table>
+            <tr style="vertical-align: bottom">
+                <td>
+                    <button id="fill" style="width: 70%; height: 50%; border-radius:30px; font-size: 20px; font-weight: bolder">דיווח על מילוי העמדה</button>
+                </td>
+                <td>
+                    <button id="clean" style="width: 70%; height: 50%; border-radius:30px; font-size: 20px; font-weight: bolder">דיווח על ניקוי האיזור המלוכלך</button>
+                </td>
+            </tr>
+            <tr style="vertical-align: top; height: 60%">
+                <td style="horiz-align: center" colspan="2">
+                    <button id ="findStation" style="width: 70%; height: 20%; border-radius:30px;">מצא לי עמדה</button>
+                </td>
+            </tr>
+        </table>
+
+        <div class="title-down1">
+            <h3 style="color: #cc1165;">Doggy Doo</h3>
+            <h3 style="color: #cc1165;">עיר נקייה, כלבים שמחים</h3>
+
+        </div>
+        <div class="rectangle" style="background-color: #99CAD9;"></div>
+        <div class="ellipse"></div>
+    </div>
+
+    <div id="alert-container" class="alert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        <span id="alert-message"></span>
+    </div>
+
+    <script>
+        document.getElementById("fill").onclick = function() {
+            handleReport('Bag', 'fill');
+        };
+
+        document.getElementById("clean").onclick = function() {
+            handleReport('Area', 'clean');
+        };
+
+        var findStation = document.getElementById("findStation")
+
+        findStation.onclick = function() {
+                window.location.href = "/findstation/{{ station_id }}";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+
+            function handleReport(reportType, action) {
+            var stationId = "{{ station_id }}";
+            var employeeId= "{{ employee_id }}";
+
+            fetch("{% url 'update_status' %}", {
+                method: "POST",
+                body: JSON.stringify({
+                    station_id: stationId,
+                    report_type: reportType,
+                    employee_id:employeeId,
+                    action: action
+                }),
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                showMessage(data.message);
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+
+        function showMessage(message) {
+            var alertContainer = document.getElementById("alert-container");
+            var alertMessage = document.getElementById("alert-message");
+            var background_color = message.includes("בהצלחה") ? "green" : "red";
+            alertMessage.textContent = message;
+            alertContainer.style.background = background_color
+            alertContainer.style.display = "block";
+
+            setTimeout(function() {
+                alertContainer.style.display = 'none';
+            }, 5000);
+        }
+
+        var logoutBth=document.getElementById("logout");
+
+            logoutBth.onclick = function() {
+                window.location.href = "/";  // העברה לעמוד ההתחברות עם ID העמדה
+            }
+    </script>
+</body>
+</html>

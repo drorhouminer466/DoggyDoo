@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<link rel="stylesheet" href="{% static 'design.css' %}">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Station</title>
+</head>
+<style>
+    .edit-station-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        width: 80%;
+        top: 20%;
+    }
+
+    .edit-station-form table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .edit-station-form td {
+        padding: 10px;
+    }
+
+    .edit-station-form button {
+        margin-top: 20px;
+        width: 50%;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">ערוך עמדה</div>
+        </div>
+        <div class="edit-station-form" id="edit-station-form">
+            <form method="post" action="{% url 'edit_station' station.id %}">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td><input type="text" name="Local_Authority_name" value="{{ station.Local_Authority_name}}" placeholder="רשות מקומית" required></td>
+                        <td><input type="text" name="Area" value="{{ station.Area }}" placeholder="אזור" required></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="lat" value="{{ station.location_coordinates.lat }}" placeholder="אורך" required></td>
+                        <td><input type="text" name="lng" value="{{ station.location_coordinates.lng }}" placeholder="רוחב" required></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="address" value="{{ station.address}}" placeholder=" כתובת" required></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <button type="submit">עדכן עמדה</button>
+                        </td>
+                    </tr>
+                </table>
+                {% if error_message %}
+                    <div class="error-message">{{ error_message }}</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</body>
+</html>

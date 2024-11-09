@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<link rel="stylesheet" href="{% static 'design.css' %}">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Employee</title>
+</head>
+<style>
+    .edit-employee-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        width: 80%;
+        top: 20%;
+    }
+
+    .edit-employee-form table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .edit-employee-form td {
+        padding: 10px;
+    }
+
+    .edit-employee-form button {
+        margin-top: 20px;
+        width: 50%;
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="titles">
+            <div class="title-app">Doggy Doo</div>
+            <div class="title-page">ערוך עובד</div>
+        </div>
+        <div class="edit-employee-form" id="edit-employee-form">
+            <form method="post" action="{% url 'edit_employee' employee.id %}">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td><input type="text" name="first_name" value="{{ employee.First_Name }}" placeholder="שם פרטי" required></td>
+                        <td><input type="text" name="last_name" value="{{ employee.Last_Name }}" placeholder="שם משפחה" required></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="phone_number" value="{{ employee.Employee_Phone_Number }}" placeholder="מס' טלפון" required></td>
+                        <td><input type="email" name="email" value="{{ employee.Employee_Mail }}" placeholder="מייל" required></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="user_name" value="{{ employee.User_Name }}" placeholder="שם משתמש" required></td>
+                        <td><input type="password" name="password1" value="{{ employee.Password }}" placeholder="סיסמא" required></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <select name="employee_type" required style="width: 100%;">
+                                <option value="manager" {% if employee.Employee_Type == 'manager' %}selected{% endif %}>מנהל</option>
+                                <option value="employee" {% if employee.Employee_Type == 'employee' %}selected{% endif %}>עובד</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <button type="submit">עדכן עובד</button>
+                        </td>
+                    </tr>
+                </table>
+                {% if error_message %}
+                    <div class="error-message">{{ error_message }}</div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</body>
+</html>
